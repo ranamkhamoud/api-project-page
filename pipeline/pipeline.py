@@ -7,44 +7,56 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import uuid
 
 AUDIO_EXTS = {'.wav', '.mp3', '.flac', '.ogg', '.m4a', '.aac'}
 
-def generate_spectrogram(audio_path, dest_path, start_time, end_time):
-    try:
-        y, sr = librosa.load(audio_path, sr=16000)
-        start_sample = int(start_time * sr)
-        end_sample = int(end_time * sr)
+def generate_spectrogram(audio_path, dest_dir, start_time, end_time):
+    y, sr = librosa.load(audio_path, sr=16000)
+    start_sample = int(start_time * sr)
+    end_sample = int(end_time * sr)
 
-        # Extract segment
-        y_segment = y[start_sample:end_sample]
-        if len(y_segment) == 0:
-            print(f"File {audio_path} is too small.")
-            return
+    # Extract segment
+    y_segment = y[start_sample:end_sample]
+    if len(y_segment) == 0 or len(y_segment) < (end_sample - start_sample):
+        raise ValueError("Audio segment is too short or empty.")
 
-        # Compute mel spectrogram
-        S = librosa.feature.melspectrogram(y=y_segment, sr=sr)
-        S_dB = librosa.power_to_db(S, ref=np.max)
+    # Compute mel spectrogram
+    S = librosa.feature.melspectrogram(y=y_segment, sr=sr)
+    S_dB = librosa.power_to_db(S, ref=np.max)
 
-        # Plot
-        plt.figure(figsize=(8, 4))
-        librosa.display.specshow(S_dB, sr=sr, x_axis='time', y_axis='mel')
-        plt.colorbar(format='%+2.0f dB')
-        plt.title(f'{Path(audio_path).stem} ({start_time}s-{end_time}s)')
-        plt.tight_layout()
+    # Plot
+    plt.figure(figsize=(4, 4))
+    plt.axis('off')
+    librosa.display.specshow(S_dB, sr=sr, x_axis=None, y_axis=None)
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-        # Save image
-        dest_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(dest_path, dpi=150)
-        plt.close()
-        print(f"Saved: {dest_path}")
-    except Exception as e:
-        print(f"Error processing {audio_path}: {e}")
+    # Save figure
+    filename = f"{uuid.uuid4().hex}.png"
+    dest_path = dest_dir / filename
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(dest_path, dpi=150, bbox_inches='tight', pad_inches=0)
+    plt.close()
 
 
 def process_directory(source_dir, dest_dir, start_time, end_time, max_workers):
     source_dir = Path(source_dir)
     dest_dir = Path(dest_dir)
+    
+    if not os.path.exists(source_dir) or os.path.isdir(source_dir) is False:
+        print(f"Source directory {source_dir} is not a directory or does not exist.")
+        return
+    
+    if not os.path.exists(dest_dir) or os.path.isdir(dest_dir) is False:
+        print(f"Destination directory {dest_dir} is not a directory or does not exist.")
+        return
+    
+    total_audio_files = sum(
+        1 for f in Path(source_dir).rglob('*')
+        if f.suffix.lower() in AUDIO_EXTS
+    )
+    progress = 0
+    failed = 0
 
     tasks = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -52,28 +64,29 @@ def process_directory(source_dir, dest_dir, start_time, end_time, max_workers):
             for file in files:
                 if Path(file).suffix.lower() in AUDIO_EXTS:
                     src_path = Path(root) / file
-                    rel_path = src_path.relative_to(source_dir)
-                    dest_path = dest_dir / rel_path.with_suffix('.png')
                     tasks.append(executor.submit(
-                        generate_spectrogram, src_path, dest_path, start_time, end_time
+                        generate_spectrogram, src_path, dest_dir, start_time, end_time
                     ))
 
         # Wait for all tasks to finish
-        for i, future in enumerate(as_completed(tasks), 1):
+        for future in as_completed(tasks):
             try:
                 future.result()
             except Exception as e:
-                print(f"Task {i} failed: {e}")
-
-
+                failed += 1
+            progress += 1
+            print(f"{progress}/{total_audio_files} files processed.")
+    
+    print(f"Processing complete. {progress} files proccessed, {failed} files failed.")
+            
 def main():
     parser = argparse.ArgumentParser(
         description="Generate mel spectrograms for all audio files in a directory."
     )
     parser.add_argument("source_dir", help="Path to the source directory containing audio files")
     parser.add_argument("dest_dir", help="Path to the destination directory for spectrogram images")
-    parser.add_argument("--start", type=float, default=10.0, help="Start time (seconds)")
-    parser.add_argument("--end", type=float, default=20.0, help="End time (seconds)")
+    parser.add_argument("--start", type=float, default=0.0, help="Start time (seconds)")
+    parser.add_argument("--end", type=float, default=10.0, help="End time (seconds)")
     parser.add_argument("--workers", type=int, default=os.cpu_count(), help="Number of parallel workers (default: all cores)")
     args = parser.parse_args()
 
