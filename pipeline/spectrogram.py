@@ -11,7 +11,13 @@ import uuid
 
 AUDIO_EXTS = {'.wav', '.mp3', '.flac', '.ogg', '.m4a', '.aac'}
 
-def generate_spectrogram(audio_path, dest_dir, start_time, end_time):
+def generate_spectrogram(
+    audio_path, 
+    dest_dir, 
+    start_time, 
+    end_time, 
+    randomize
+):
     y, sr = librosa.load(audio_path, sr=16000)
     start_sample = int(start_time * sr)
     end_sample = int(end_time * sr)
@@ -32,14 +38,19 @@ def generate_spectrogram(audio_path, dest_dir, start_time, end_time):
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     # Save figure
-    filename = f"{uuid.uuid4().hex}.png"
+    if randomize:
+        filename = f"{uuid.uuid4().hex}.png"
+    else:
+        basename = os.path.basename(audio_path)
+        filename = os.path.splitext(basename)[0] + ".png"
+        
     dest_path = dest_dir / filename
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(dest_path, dpi=150, bbox_inches='tight', pad_inches=0)
     plt.close()
 
 
-def process_directory(source_dir, dest_dir, start_time, end_time, max_workers):
+def process_directory(source_dir, dest_dir, start_time, end_time, max_workers, randomize):
     source_dir = Path(source_dir)
     dest_dir = Path(dest_dir)
     
@@ -65,7 +76,7 @@ def process_directory(source_dir, dest_dir, start_time, end_time, max_workers):
                 if Path(file).suffix.lower() in AUDIO_EXTS:
                     src_path = Path(root) / file
                     tasks.append(executor.submit(
-                        generate_spectrogram, src_path, dest_dir, start_time, end_time
+                        generate_spectrogram, src_path, dest_dir, start_time, end_time, randomize
                     ))
 
         # Wait for all tasks to finish
@@ -88,9 +99,10 @@ def main():
     parser.add_argument("--start", type=float, default=0.0, help="Start time (seconds)")
     parser.add_argument("--end", type=float, default=10.0, help="End time (seconds)")
     parser.add_argument("--workers", type=int, default=os.cpu_count(), help="Number of parallel workers (default: all cores)")
+    parser.add_argument("--randomize_name", action="store_true", help="Give each spectrogram a random name.")
     args = parser.parse_args()
 
-    process_directory(args.source_dir, args.dest_dir, args.start, args.end, args.workers)
+    process_directory(args.source_dir, args.dest_dir, args.start, args.end, args.workers, args.randomize_name)
 
 if __name__ == "__main__":
     main()
