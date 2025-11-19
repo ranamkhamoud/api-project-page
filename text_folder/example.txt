@@ -1,2 +1,0 @@
-This is an example text file.
-And this is the second line.

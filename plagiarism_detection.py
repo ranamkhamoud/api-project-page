@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 from transformers import AutoTokenizer, AutoConfig, AutoModel, PreTrainedModel
 from pathlib import Path
-import re
-
 import json
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+# nothing is random here so no seed is set
 
 # code used from https://huggingface.co/desklib/ai-text-detector-v1.01 and modified for this project
 class DesklibAIDetectionModel(PreTrainedModel):
@@ -65,7 +65,7 @@ def predict_single_text(text, model, tokenizer, device, max_len=768, threshold=0
     return probability, ai_detected
 
 # own code to easily create text files, and feed them to the model for predictions
-def ai_plagiarism_detection(text,show_results=False):
+def ai_plagiarism_detection(text, threshold=0.5, show_results=False):
     """
     Detect if the given text is AI generated or human written.
     Args:
@@ -85,7 +85,7 @@ def ai_plagiarism_detection(text,show_results=False):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     # Predict
-    probability, ai_detected = predict_single_text(text, model, tokenizer, device)
+    probability, ai_detected = predict_single_text(text, model, tokenizer, device, threshold=threshold)
     # to print results
     if show_results:
         print(f"Probability of being AI generated: {probability:.4f}")
@@ -120,9 +120,9 @@ def get_text_from_textfile(text_dir="text_folder"):
         text_dict[elem.name] = content  # use filename as key
     return text_dict
 
-def run_experiment_using_textfiles():
+def classifying_plagiarism_using_textfiles(best_threshold=0.78):
     """
-    This function shows how this model can be used to detect ai in the text files in the text_folder folder.
+    This function shows how this model can be used to detect ai in the text files in the text_folder folder. This is what is to be used in the pipeline.
     """
     # make sure folder exists
     Path("text_folder").mkdir(exist_ok=True)
@@ -136,7 +136,7 @@ def run_experiment_using_textfiles():
     for textfile, text in textfile_dict.items(): # for key, value in ft_dict.items():
         print(f"Getting predictions for: {textfile}")
         # ---------- GET PREDICTIONS ----------
-        probability, ai_detected = ai_plagiarism_detection(text, show_results=False)
+        probability, ai_detected = ai_plagiarism_detection(text=text, threshold=best_threshold, show_results=False) # get predictions with the optimal threshold value: 0.78
         # print results
         print(f"{textfile} Results:\n Probability of being AI generated: {probability:.4f}")
         print(f" Predicted label: {'AI Generated' if ai_detected else 'Not AI Generated'}\n")
@@ -169,13 +169,14 @@ def get_texts_from_jsonfile(json_file_path, sample_size=100, ignore_warning=Fals
 
     return text_list
 
-def run_experiment_using_jsonfile():
+def run_experiment_using_jsonfile(threshold=0.5):
     """
     This function runs the experiment and saves the results in ai_plagiarism_experiment/ai_plagiarism_detection_results.csv
     """
     # Set Total sample size, there are two datasets (json's) used, so sample_size//2 per dataset is used.
     sample_size = 240 
-    sample_size //=2 
+    sample_size //=2
+    
 
     # make sure folders exist
     Path("json_folder").mkdir(exist_ok=True)
@@ -189,11 +190,7 @@ def run_experiment_using_jsonfile():
     predictions=[]
     for i, text in enumerate(text_list):
         # ---------- GET PREDICTIONS ----------
-        probability, ai_detected = ai_plagiarism_detection(text, show_results=False)
-        # # print results
-        # print(f"Text {i} Results:\n Probability of being AI generated: {probability:.4f}")
-        # print(f" Predicted label: {'AI Generated' if ai_detected else 'Not AI Generated'}\n")
-
+        probability, ai_detected = ai_plagiarism_detection(text=text, threshold=threshold, show_results=False)
         # save results
         predictions.append({"ML_commons_text_index": i,
                             "GPT_text_index": np.nan,
@@ -205,7 +202,7 @@ def run_experiment_using_jsonfile():
                             })
     # convert to dataframe
     df = pd.DataFrame(predictions)
-    print("-------- 50% of samples predicted --------")
+    print("-------- 50% of samples predicted of json experiment --------")
     
     # ------- GET TRUE POSITIVE TEXTS (ai written) FROM JSON FILE -------
     # load json file with gpt generated texts
@@ -214,7 +211,7 @@ def run_experiment_using_jsonfile():
     predictions=[]
     for i, text in enumerate(text_list):
         # ---------- GET PREDICTIONS ----------
-        probability, ai_detected = ai_plagiarism_detection(text, show_results=False)
+        probability, ai_detected = ai_plagiarism_detection(text=text, threshold=threshold, show_results=False)
         # # print results
         # print(f"Text {i} Results:\n Probability of being AI generated: {probability:.4f}")
         # print(f" Predicted label: {'AI Generated' if ai_detected else 'Not AI Generated'}\n")
@@ -238,26 +235,28 @@ def run_experiment_using_jsonfile():
     # convert to dataframe
     new_rows = pd.DataFrame(predictions)
     df = pd.concat([df, new_rows], ignore_index=True)
-    print("------- 100% of samples predicted --------")
+    print("------- 100% of samples predicted of json experiment --------")
     # save to csv
     df.to_csv("ai_plagiarism_experiment/ai_plagiarism_detection_results.csv", index=False)
 
     # update metrics
-    get_metrics()
+    get_metrics(threshold=threshold)
 
 
-def get_metrics():
+def get_metrics(df=None, threshold=0.5, save_to_csv=True):
     """
-    This function calculates the metrics and saves them in ai_plagiarism_experiment/res_metrics.csv
+    This function calculates the metrics and saves them in ai_plagiarism_experiment/res_metrics(t={threshold}).csv
     """
-    # read from csv
-    df = pd.read_csv("ai_plagiarism_experiment/ai_plagiarism_detection_results.csv")
-    
+
+    if df is None:
+        # read from csv
+        df = pd.read_csv("ai_plagiarism_experiment/ai_plagiarism_detection_results.csv")
+
     # calculate metrics
-    fp = ((df["ai_detected"]) & (df["really_ai"]==False)).sum()        # false positives, cause all texts are human thought texts, however whisper makes text look more ai like
-    tn = ((df["ai_detected"]==False) & (df["really_ai"]==False)).sum() # true negatives
-    tp = ((df["ai_detected"]) & (df["really_ai"]==True)).sum()         # true positives
-    fn = ((df["ai_detected"]==False) & (df["really_ai"]==True)).sum()  # false negatives
+    fp = ((df["probability"]>=threshold) & (df["really_ai"]==False)).sum()  # false positives, cause all texts are human thought texts, however whisper makes text look more ai like
+    tn = ((df["probability"]<threshold) & (df["really_ai"]==False)).sum()   # true negatives
+    tp = ((df["probability"]>=threshold) & (df["really_ai"]==True)).sum()   # true positives
+    fn = ((df["probability"]<threshold) & (df["really_ai"]==True)).sum()    # false negatives
 
     recall = tp/(tp+fn) if (tp+fn) != 0 else 0
     precision = tp/(tp+fp) if (tp+fp) != 0 else 0
@@ -268,28 +267,74 @@ def get_metrics():
     ML_commons_length_std = df.loc[df["ML_commons_text_index"].notna(), "text_length"].std()
     gpt_length_mean = df.loc[df["GPT_text_index"].notna(), "text_length"].mean()
     gpt_length_std = df.loc[df["GPT_text_index"].notna(), "text_length"].std()
+        
 
     # save metrics in dataframe
     results = pd.DataFrame({
         "Metric": ["TP", "TN", "FP", "FN", "Recall", "Precision", "Accuracy", "Total samples", "ML_commons_length_mean", "ML_commons_length_std", "gpt_length_mean", "gpt_length_std"],
         "Value": [tp, tn, fp, fn, recall, precision, accuracy, len(df), ML_commons_length_mean, ML_commons_length_std, gpt_length_mean, gpt_length_std]
     })
-    # save in csv
-    results.to_csv("ai_plagiarism_experiment/confusion_matrix_results.csv", index=False) 
-    print(results)
+    if save_to_csv:
+        # save in csv
+        results.to_csv(f"ai_plagiarism_experiment/res_metrics(t={threshold}).csv", index=False) 
+    return results
     
+def tune_threshold(metric = "Accuracy"):
+    """This function maximises the accuracy of the ai plagiarism detector given the results.csv"""
 
+    df = pd.read_csv("ai_plagiarism_experiment/ai_plagiarism_detection_results.csv")
+    # set boundaries
+    min = 0.0
+    max = 1.0
+    step = 0.01
+    # init
+    best_accuracy=0
+    m_l=[]
+    t_l=[]
+    for threshold in np.arange(min, max+step, step):
+        threshold = round(threshold, 2)
+        results = get_metrics(df,threshold,False)
+        opti_metric = results.loc[results["Metric"] == metric, "Value"].iloc[0]
+        # save for plotting
+        m_l.append(opti_metric)
+        t_l.append(threshold)
+        # update best threshold
+        if opti_metric>best_accuracy:
+            best_accuracy = opti_metric
+            best_threshold = threshold
+
+    # plot tuning
+    Path("ai_plagiarism_tuning_plots").mkdir(exist_ok=True)
+    plt.plot(t_l, m_l)
+    plt.xlabel("threshold")
+    plt.ylabel(metric)
+    plt.title(f"threshold vs {metric}")
+    plt.savefig(f"ai_plagiarism_tuning_plots/threshold_vs_{metric}.png")
+    plt.close()
+    return best_threshold
 
 
         
         
 
 if __name__ == "__main__":
-    
+    print("-------- Starting ai plagiarism experiment! --------\n")
     # run experiment using json files
-    run_experiment_using_jsonfile()
+    run_experiment_using_jsonfile(threshold=0.5) # firstly using the default threshold
 
-    # example of usage that is fit for a pipeline
-    # run_experiment_using_textfiles()
+    # search for the theshold that maximises accuracy
+    metric = "Accuracy"
+    best_threshold_accuracy = tune_threshold(metric=metric)
+    print(f"Best theshold for {metric}: {best_threshold_accuracy}")
+    # search for the theshold that maximises precision
+    metric = "Precision"
+    best_threshold_precision = tune_threshold(metric=metric)
+    print(f"Best theshold for {metric}: {best_threshold_precision}")
+
+    # run experiment using json files
+    run_experiment_using_jsonfile(threshold=best_threshold_accuracy) # secondly using the optimal threshold, the end result is 
+    
+    # example of usage that is fit for a pipeline using the best accuracy (best_threshold=0.78), when using best precision use best_threshold=0.97
+    classifying_plagiarism_using_textfiles(best_threshold=best_threshold_accuracy)
 
     print("\n-------- Done! -------- ")
