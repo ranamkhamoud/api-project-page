@@ -318,7 +318,7 @@ def tune_threshold(metric = "Accuracy"):
         
 
 if __name__ == "__main__":
-    print("-------- Starting ai plagiarism experiment! --------\n")
+    print("-------- Starting ai plagiarism experiment! --------\n")    
     # run experiment using json files
     run_experiment_using_jsonfile(threshold=0.5) # firstly using the default threshold
 
