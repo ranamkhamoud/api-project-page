@@ -1,2 +1,4 @@
 librosa
 matplotlib
+torch
+torchvision
