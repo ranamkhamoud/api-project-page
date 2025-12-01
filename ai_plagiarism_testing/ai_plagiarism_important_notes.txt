@@ -1,0 +1,45 @@
+
+About the first text:
+the first text is:
+i wanted this to share a few things but i'm going to not share as much as i wanted to share because we are starting late i'd like to get this thing going so we all get home at a decent hour this this election is very important to
+But should be:
+I wanted th the to share a few things...
+
+The speaker stumbles over words, but because of whisper it gives words that don't fit on those places.
+This makes the ai plagiariser think it is a wierd text and thus that it is written by ai.
+Probability of being AI generated: 0.9373
+Predicted label: AI Generated
+
+
+The prompt for generating the ai text:
+Generate text about a random sience topic of about 5000 words but in the style of whisper, and without bullet points, and without captions. 
+Also make partitions of the same text with a mean length of 200 charters. 
+Put these partitions in a json file with json1 formatting like: {"text": "one partition here"}, for every partition.
+
+For the first 40 partitions, the topic was: astonomy.
+For the second 40 partitions, the topic was: quantum computing.
+For the third 40 partitions, the topic was: daily life, personal growth, and everyday experiences.
+The 5000 words was not reached and in total 120 
+If there is room, show a snipit of the texts, if still room, show ML_commons whisper example.
+
+The threshold is tuned using all data in the json_folder. While working under the assumption that 
+the gpt generated text matches a whisper style output, the data is not exactly the same as when the 
+texts were whisper transcribed with a human speaker. Because of the ai like transcribed text caused by stuttering, 
+finetuning whisper on the used data might increase the accuracy of the plagiarism detector.
+Since finetuning whisper was not feasible, we chose to leave the ai plagiarism detector model 
+intact and fintune only the threshold. Because the weights of the model are not altered, there 
+is no overfitting by tuning only the threshold, since the model still captures the same features, 
+but now the threshold of determining that it is ai is set higher.
+
+Showing that stuttering likely impacts the ai plagiarism detector model output is shown by giving as input test_human.txt and test_ai.txt.
+Instead of the stuttering becoming actual words that don't fit, the the words become partial words in test_human.txt.
+This is the result:
+Getting predictions for: test_ai.txt
+test_ai.txt Results:
+ Probability of being AI generated: 0.9373
+ Predicted label: AI Generated
+
+Getting predictions for: test_human.txt
+test_human.txt Results:
+ Probability of being AI generated: 0.8497
+ Predicted label: AI Generated

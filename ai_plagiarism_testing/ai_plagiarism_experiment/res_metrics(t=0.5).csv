@@ -1,0 +1,13 @@
+Metric,Value
+TP,103.0
+TN,40.0
+FP,80.0
+FN,17.0
+Recall,0.8583333333333333
+Precision,0.5628415300546448
+Accuracy,0.5958333333333333
+Total samples,240.0
+ML_commons_length_mean,223.71666666666667
+ML_commons_length_std,40.044341669203256
+gpt_length_mean,204.9
+gpt_length_std,20.28883867524004
