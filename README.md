@@ -12,7 +12,7 @@ A multi-modal pipeline for detecting AI-assisted responses in audio recordings. 
 
 - **Live Demo:** [Try on Hugging Face Spaces](https://huggingface.co/spaces/ranamhamoud/Authenticity)
 
-- **Project Website:** [Documentation on Netlify](https://api-project-2025.netlify.app/)
+- **Project Website:** [Documentation](https://api-project-2025.netlify.app/)
 
 
 ---

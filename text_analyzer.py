@@ -1,44 +1,33 @@
-import re
-import requests
-from typing import Dict, List, Tuple, Optional
-import torch
-from transformers import (
-    AutoTokenizer, 
-    AutoModelForSequenceClassification,
-    RobertaTokenizer,
-    RobertaForSequenceClassification
-)
-import numpy as np
-from collections import Counter
 import warnings
 warnings.filterwarnings("ignore")
 
+# try to import the desklib ai detector
 try:
     from plagiarism_detection import ai_plagiarism_detection
     DESKLIB_AVAILABLE = True
 except ImportError:
     DESKLIB_AVAILABLE = False
-    print("Warning: plagiarism_detection module not found. Using fallback AI detection.")
+    print("warning: cant find plagiarism_detection module")
 
 
-
-
+# class for detecting ai-generated text
 class AITextDetector:
-    def __init__(self, device: str = None, threshold: float = 0.78):
+    def __init__(self, device=None, threshold=0.78):
         self.threshold = threshold
         
         if not DESKLIB_AVAILABLE:
-            print("Warning: plagiarism_detection module not found. AI detection will not be available.")
-            print("Ensure plagiarism_detection.py is in the same directory.")
+            print("warning: plagiarism module missing, ai detection wont work")
+            print("make sure plagiarism_detection.py is in same folder")
             self.available = False
         else:
-            print(f"Using Desklib AI text detector (threshold: {self.threshold})")
+            print(f"using desklib detector (threshold={self.threshold})")
             self.available = True
     
-    def detect_ai_text(self, text: str) -> Dict:
+    # main detection function
+    def detect_ai_text(self, text):
 
+        # return neutral result if detector not available
         if not self.available:
-            # Return neutral result if Desklib not available
             return {
                 'ai_generated': False,
                 'confidence': 0.5,
@@ -47,7 +36,7 @@ class AITextDetector:
                 'model_used': 'N/A (module not found)'
             }
         
-        # Use Desklib AI detector
+        # run detection using desklib model
         try:
             probability, ai_detected = ai_plagiarism_detection(
                 text, 
@@ -58,22 +47,22 @@ class AITextDetector:
             return {
                 'ai_generated': ai_detected,
                 'confidence': float(probability),
-                'indicators': self._identify_ai_indicators(probability),
-                'interpretation': self._interpret_ai_detection(probability),
+                'indicators': self.identify_ai_indicators(probability),
+                'interpretation': self.interpret_ai_detection(probability),
                 'model_used': 'Desklib AI Detector v1.01'
             }
         except Exception as e:
-            print(f"Error in AI detection: {e}")
+            print(f"ai detection failed: {e}")
             return {
                 'ai_generated': False,
                 'confidence': 0.5,
                 'indicators': [],
-                'interpretation': f"AI detection error: {str(e)}",
+                'interpretation': "Could not run AI detection",
                 'model_used': 'Error'
             }
     
-    
-    def _identify_ai_indicators(self, probability: float) -> List[str]:
+    # identify specific indicators based on probability
+    def identify_ai_indicators(self, probability):
         indicators = []
         
         if probability > 0.9:
@@ -85,7 +74,7 @@ class AITextDetector:
         
         return indicators
     
-    def _interpret_ai_detection(self, score: float) -> str:
+    def interpret_ai_detection(self, score):
         interpretation = f"**AI-Generated Text Detection:**\n\n"
         interpretation += f"- AI Probability Score: {score*100:.1f}%\n"
         interpretation += f"- Detection Threshold: {self.threshold*100:.0f}%\n"
@@ -95,19 +84,20 @@ class AITextDetector:
 
 class TextAuthenticityAnalyzer:
 
-    def __init__(self, device: str = None, ai_threshold: float = 0.78):
-
+    def __init__(self, device=None, ai_threshold=0.78):
+        # initialize ai detector
         self.ai_detector = AITextDetector(device=device, threshold=ai_threshold)
         
-    def analyze(self, text: str) -> Dict:
-        # Run AI detection
+    # analyze text for authenticity
+    def analyze(self, text):
+        # run ai detection
         ai_results = self.ai_detector.detect_ai_text(text)
         
-        # Calculate overall authenticity score based on AI detection
+        # calculate authenticity score
         ai_penalty = ai_results['confidence']
         authenticity_score = 1.0 - ai_penalty
         
-        # Determine overall assessment
+        # determine risk level based on authenticity
         if authenticity_score < 0.3:
             overall_assessment = "HIGH RISK: Strong AI-generated text indicators"
             risk_level = "high"
@@ -130,8 +120,6 @@ class TextAuthenticityAnalyzer:
     
 
 if __name__ == "__main__":
-    # Example usage
     analyzer = TextAuthenticityAnalyzer()
-    print("Text authenticity analyzer initialized.")
-    print("Components: Plagiarism Detector + AI Text Detector")
-
+    print("text analyzer ready")
+    print("using plagiarism detector + ai detector")

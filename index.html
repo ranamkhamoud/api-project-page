@@ -3,11 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Audio Processing & Indexing — Project Page</title>
+  <title>Detecting AI-Assisted Responses — Project Page</title>
   <link rel="icon" type="image/svg+xml" href="audio-wave.svg" />
-  <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="description" content="Project page template for Audio Processing & Indexing — modern, responsive, and accessible." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -43,11 +41,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="grid lg:grid-cols-3 gap-10 items-center">
         <div class="lg:col-span-2">
-          <h2 class="text-3xl sm:text-4xl font-bold leading-tight">Detecting AI-Assisted Responses in Online Interviews</h2>
-          <p class="mt-4 text-lg text-gray-700">A concise one-liner describing what the project does or investigates. Keep it short and informative.</p>
+          <h2 class="text-3xl sm:text-4xl font-bold leading-tight">A Multimodal Pipeline for Detecting Authenticity in Spoken Responses</h2>
+          <p class="mt-4 text-lg text-gray-700">Combines acoustic analysis, speech recognition, and AI text detection to identify whether interview responses are spontaneous or read from AI-generated scripts.</p>
           <div class="mt-6 flex flex-wrap gap-3">
-            <a href="#deliverables" class="inline-flex items-center rounded-lg border border-blue-600 px-4 py-2 text-blue-700 hover:bg-blue-50">Jump to Deliverables</a>
-            <a href="#abstract" class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100">Read Abstract</a>
+            <a href="https://huggingface.co/spaces/ranamhamoud/Authenticity" target="_blank" class="inline-flex items-center rounded-lg border border-blue-600 px-4 py-2 text-blue-700 hover:bg-blue-50">Try Live Demo</a>
+            <a href="https://github.com/ranamkhamoud/api-project-page" target="_blank" class="inline-flex items-center rounded-lg border border-gray-900 px-4 py-2 text-gray-900 hover:bg-gray-100">View on GitHub</a>
+            <a href="#abstract" class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100">Details</a>
           </div>
         </div>
         <div class="lg:col-span-1">
@@ -62,10 +61,12 @@
             <div class="mt-5 border-t pt-4">
               <h4 class="text-sm font-semibold text-gray-600">Quick Links</h4>
               <ul class="mt-2 text-sm space-y-2">
-                <li><a class="text-blue-600 hover:underline" href="#goals">Goals</a></li>
-                <li><a class="text-blue-600 hover:underline" href="#design">Design</a></li>
-                <li><a class="text-blue-600 hover:underline" href="#implementation">Implementation</a></li>
-                <li><a class="text-blue-600 hover:underline" href="#experimentation">Experimentation</a></li>
+                <li><a class="text-blue-600 hover:underline" href="#abstract">Abstract</a></li>
+                <li><a class="text-blue-600 hover:underline" href="#introduction">Introduction</a></li>
+                <li><a class="text-blue-600 hover:underline" href="#design">System Design</a></li>
+                <li><a class="text-blue-600 hover:underline" href="#data">Data</a></li>
+                <li><a class="text-blue-600 hover:underline" href="#experimentation">Experiments</a></li>
+                <li><a class="text-blue-600 hover:underline" href="#deliverables">Deliverables</a></li>
               </ul>
             </div>
           </div>
@@ -79,108 +80,195 @@
     <div class="grid lg:grid-cols-12 gap-10">
       <!-- Content -->
       <section class="lg:col-span-9 space-y-12">
-        <!-- Goals -->
-        <section id="goals" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">Goals</h3>
-          <p class="mt-2 text-gray-700">Describe the project goals clearly and concretely. What are the objectives and success criteria?</p>
-        </section>
-
         <!-- Abstract -->
         <section id="abstract" class="anchor-offset">
           <h3 class="text-2xl font-semibold">Abstract</h3>
-          <p class="mt-2 text-gray-700">A short abstract of the work done, the obtained results, and the novelty of the work. Keep to 100–150 words.</p>
+          <p class="mt-2 text-gray-700">
+            Large language models enable candidates to generate polished answers and read them aloud during spoken interviews. Existing detection methods address audio or text in isolation, leaving a gap for AI-generated but human-delivered responses.
+          </p>
+          <p class="mt-3 text-gray-700">
+            We present a multimodal pipeline combining a CNN classifier for read/spontaneous speech, Whisper-based transcription with linguistic analysis, and AI-generated text detection. On 20 recordings from native and non-native speakers, individual components achieved 50–70% accuracy, while weighted fusion reached 95% accuracy.
+          </p>
         </section>
 
         <!-- Introduction -->
         <section id="introduction" class="anchor-offset">
           <h3 class="text-2xl font-semibold">Introduction</h3>
-          <p class="mt-2 text-gray-700">Give an introduction to the problem. Discuss the state of the art and related work. Sketch your approach and why it is promising.</p>
+          <p class="mt-2 text-gray-700">
+            Online assessments are widely used in recruitment, but LLMs can generate contextually appropriate answers in seconds. Candidates can prompt an LLM, get a polished answer, and read it aloud during interviews or in online settings.
+          </p>
+          <p class="mt-3 text-gray-700">
+            Text-only tools cannot distinguish reading from spontaneous speech. Purely acoustic approaches don't address content authorship. This motivates a multimodal approach analyzing both <em>how</em> something is said and <em>what</em> is being said.
+          </p>
         </section>
 
-        <!-- Design -->
+        <!-- System Overview -->
         <section id="design" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">Design</h3>
-          <p class="mt-2 text-gray-700">Discuss the design of your solution or approach. Include diagrams or high-level architecture if helpful.</p>
-        </section>
+          <h3 class="text-2xl font-semibold">System Overview & Architecture</h3>
+          <p class="mt-2 text-gray-700">
+            The pipeline has three stages: processing, analysis, and results. Input is audio (WAV, MP3, M4A, FLAC, OGG) between 30 seconds and 5 minutes.
+          </p>
+          
+          <div class="mt-5 bg-white border border-gray-200 rounded-xl p-6">
+            <!-- <h4 class="font-semibold text-lg mb-4">Pipeline Architecture Diagram</h4> -->
+            <img src="assets/overview.jpg" alt="Multimodal authenticity pipeline architecture" class="w-full">
+            <p class="mt-3 text-gray-600 text-sm">
+              Audio is processed into mel-spectrograms, acoustic features, and Whisper transcripts. Weighted outputs (15% acoustic, 50% AI detection, 35% linguistic) combine into a composite authenticity score mapped to four verdict categories.
+            </p>
+          </div>
 
-        <!-- Implementation -->
-        <section id="implementation" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">Implementation</h3>
-          <p class="mt-2 text-gray-700">Describe implementation details, encountered difficulties, and how you solved them. Mention tools, frameworks, and datasets.</p>
-        </section>
-
-        <!-- Experimentation -->
-        <section id="experimentation" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">Experimentation</h3>
-          <p class="mt-2 text-gray-700">Describe your experimental setup and validation methodology. Present results and discuss limitations and future work.</p>
-        </section>
-
-        <!-- Requirements -->
-        <section id="requirements" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">Requirements</h3>
-          <div class="mt-5 grid sm:grid-cols-2 gap-5">
-            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-              <h4 class="font-semibold">Software</h4>
-              <ul class="mt-3 list-disc list-inside text-gray-700">
-                <li>C / C++</li>
-                <li>Packages / Frameworks</li>
-                <li>Open-source code</li>
-              </ul>
-            </div>
-            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-              <h4 class="font-semibold">Hardware</h4>
-              <ul class="mt-3 list-disc list-inside text-gray-700">
-                <li>Minimum hardware requirements</li>
-                <li>Special hardware (if any)</li>
-              </ul>
+          <div class="mt-5 bg-white border border-gray-200 rounded-xl p-6">
+            <h4 class="font-semibold text-lg mb-4">Pipeline Stages</h4>
+            <div class="space-y-4">
+              <div class="flex gap-4">
+                <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-semibold">1</div>
+                <div>
+                  <p class="font-medium">Processing Stage</p>
+                  <p class="text-gray-600 text-sm">Extracts mel-spectrograms, acoustic features (tempo, pitch, energy, ZCR), and Whisper ASR transcripts with timestamps.</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-semibold">2</div>
+                <div>
+                  <p class="font-medium">Analysis Stage</p>
+                  <p class="text-gray-600 text-sm">ResNet18-based CNN classifies speech style. Prosody features evaluated via thresholds. Transcript analyzed for AI patterns and linguistic markers.</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-semibold">3</div>
+                <div>
+                  <p class="font-medium">Results Stage</p>
+                  <p class="text-gray-600 text-sm">Composite score categorized as: Authentic (≥0.70), Likely Authentic (0.50–0.70), Questionable (0.30–0.50), or Likely Inauthentic (&lt;0.30).</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- Work Plan -->
-        <section id="work-plan" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">Work Plan</h3>
-          <ol class="mt-3 list-decimal list-inside text-gray-700 space-y-1">
-            <li>Project Proposals</li>
-            <li>Project Presentations</li>
-            <li>Status Reports</li>
-            <li>Final Project Presentation / Demo</li>
-            <li>Final Project Technical Paper</li>
-          </ol>
+        <!-- Data Description -->
+        <section id="data" class="anchor-offset">
+          <h3 class="text-2xl font-semibold">Data Description</h3>
+          
+          <div class="mt-5 bg-white border border-gray-200 rounded-xl p-5">
+            <h4 class="font-semibold">IEMOCAP Corpus (Training Data)</h4>
+            <p class="mt-2 text-gray-700 text-sm">
+              The <a href="https://github.com/ranamkhamoud/api-project-page/blob/main/iemocap.zip" target="_blank" class="text-blue-600 hover:underline">IEMOCAP corpus</a> (~12 hours) contains scripted dialogues and improvised scenarios from ten actors, providing clear distinction between read and spontaneous speech for training the CNN classifier.
+            </p>
+          </div>
+
+          <div class="mt-5 bg-white border border-gray-200 rounded-xl p-5">
+            <h4 class="font-semibold">Internally Collected Speech Data (Test Data)</h4>
+            <p class="mt-2 text-gray-700 text-sm">
+              We collected <a href="https://github.com/ranamkhamoud/api-project-page/blob/main/samples_read_vs_spon.zip" target="_blank" class="text-blue-600 hover:underline">20 samples</a> from two speakers (L1 and L2 English): 10 spontaneous and 10 read responses. Read responses used ChatGPT-generated scripts. Spontaneous recordings were completed first to avoid exposure bias.
+            </p>
+          </div>
+        </section>
+
+        <!-- Experimentation -->
+        <section id="experimentation" class="anchor-offset">
+          <h3 class="text-2xl font-semibold">Experiments and Evaluation</h3>
+          
+
+          
+          <h4 class="mt-5 font-semibold">Full Pipeline Evaluation</h4>
+          <p class="mt-2 text-gray-700">
+            Read speech scored 0.19–0.28 (mean 0.22); spontaneous scored 0.23–0.75 (mean 0.46). A threshold of 0.285 yielded 95% accuracy (19/20 correct).
+          </p>
+
+          <div class="mt-5 bg-white border border-gray-200 rounded-xl p-5">
+            <!-- <h4 class="font-semibold mb-3">Composite Authenticity Scores Distribution</h4> -->
+            <img src="assets/composite_scores_plot.png" alt="Bar chart showing composite authenticity scores" class="w-full rounded-lg">
+            <p class="mt-3 text-gray-600 text-sm">
+              Composite scores for read (R1-R10) and spontaneous (S1-S10) samples. Dashed line shows decision threshold at 0.285.
+            </p>
+          </div>
+          
+          <div class="mt-5 grid sm:grid-cols-3 gap-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+              <p class="text-3xl font-bold text-blue-700">95%</p>
+              <p class="text-sm text-gray-600">Overall Accuracy</p>
+            </div>
+            <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+              <p class="text-3xl font-bold text-green-700">100%</p>
+              <p class="text-sm text-gray-600">Read Speech Detection</p>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+              <p class="text-3xl font-bold text-amber-700">90%</p>
+              <p class="text-sm text-gray-600">Spontaneous Detection</p>
+            </div>
+          </div>
+          
+          <h4 class="mt-5 font-semibold">Discussion</h4>
+          <p class="mt-2 text-gray-700">
+            No single component performs well enough alone. Text authenticity was the strongest discriminator; acoustic features add complementary prosodic cues. The L1 speaker achieved 100% accuracy; L2 speaker achieved 90% (one fluent spontaneous sample misclassified).
+          </p>
+        </section>
+
+        <!-- Limitations & Ethics -->
+        <section id="limitations" class="anchor-offset">
+          <h3 class="text-2xl font-semibold">Limitations & Ethical Considerations</h3>
+          
+          <div class="mt-5 bg-amber-50 border border-amber-200 rounded-xl p-5">
+            <ul class="mt-3 space-y-2 text-gray-700 text-sm list-disc list-inside">
+              <li>Only 20 samples from 2 speakers</li>
+              <li>CNN trained on acted speech, not naturalistic interviews</li>
+              <li>Highly articulate spontaneous speakers may be flagged</li>
+              <li>English only; other languages untested</li>
+            </ul>
+          </div>
+
+          <div class="mt-5 bg-red-50 border border-red-200 rounded-xl p-5">
+            <h4 class="font-semibold text-red-900">Ethical Considerations</h4>
+            <p class="mt-3 text-gray-700 text-sm">
+              False positives can have serious consequences. The system may disproportionately affect formal speakers, non-native speakers, or neurodivergent individuals.
+            </p>
+            <p class="mt-3 text-gray-700 text-sm">
+              <strong>This system should flag responses for human review, not make autonomous decisions.</strong> Voice data collection requires informed consent and secure handling.
+            </p>
+          </div>
         </section>
 
         <!-- Deliverables -->
         <section id="deliverables" class="anchor-offset">
           <h3 class="text-2xl font-semibold">Deliverables</h3>
-          <div class="mt-5 grid sm:grid-cols-2 gap-5">
-            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-              <h4 class="font-semibold">Technical Paper</h4>
-              <p class="mt-2 text-gray-700">Link to your technical paper (PDF). Include a one-line summary.</p>
-              <a href="#" class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Download PDF</a>
-            </div>
+          <div class="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
               <h4 class="font-semibold">Project Code</h4>
-              <p class="mt-2 text-gray-700">Link to your project code (ZIP or repository). Include install notes and dataset links.</p>
-              <a href="#" class="mt-4 inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-white hover:bg-gray-800">Get the Code</a>
+              <p class="mt-2 text-gray-700">Full Python implementation with CNN, Whisper, and AI detection.</p>
+              <a href="https://github.com/ranamkhamoud/api-project-page" target="_blank" class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">View on GitHub</a>
             </div>
+            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+              <h4 class="font-semibold">Training Data</h4>
+              <p class="mt-2 text-gray-700">IEMOCAP corpus for CNN training.</p>
+              <a href="https://sail.usc.edu/iemocap/" target="_blank" class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Request Data</a>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+              <h4 class="font-semibold">Test Dataset</h4>
+              <p class="mt-2 text-gray-700">20 samples from native and non-native speakers.</p>
+              <a href="https://github.com/ranamkhamoud/api-project-page/blob/main/samples_read_vs_spon.zip" target="_blank" class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Download Samples</a>
+            </div>
+            <!-- <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+              <h4 class="font-semibold">Technical Paper</h4>
+              <p class="mt-2 text-gray-700">Full methodology and evaluation documentation.</p>
+              <a href="report.pdf" class="mt-4 inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Download PDF</a>
+            </div> -->
           </div>
         </section>
 
-        <!-- References -->
-        <section id="references" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">References</h3>
-          <ul class="mt-3 space-y-2 text-gray-700">
-            <li>Add links and references to the articles and books that you used.</li>
-          </ul>
-        </section>
 
-        <!-- Project Links -->
-        <section id="project-links" class="anchor-offset">
-          <h3 class="text-2xl font-semibold">Project Links</h3>
-          <ul class="mt-3 space-y-2 text-blue-700">
-            <li><a class="hover:underline" href="https://wp.nyu.edu/ismir2016/" target="_blank" rel="noreferrer noopener">ISMIR 2016</a></li>
-            <li><a class="hover:underline" href="https://www.interspeech2016.org/" target="_blank" rel="noreferrer noopener">INTERSPEECH 2016</a></li>
-          </ul>
+        <!-- Related Links -->
+        <section id="related-links" class="anchor-offset">
+          <h3 class="text-2xl font-semibold">Related Links</h3>
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+              <h4 class="font-semibold text-sm">Tools & Frameworks</h4>
+              <ul class="mt-2 space-y-1 text-sm text-blue-700">
+                <li><a class="hover:underline" href="https://openai.com/research/whisper" target="_blank">OpenAI Whisper ASR</a></li>
+                <li><a class="hover:underline" href="https://www.gradio.app/" target="_blank">Gradio Web Framework</a></li>
+                <li><a class="hover:underline" href="https://pytorch.org/" target="_blank">PyTorch</a></li>
+                <li><a class="hover:underline" href="https://librosa.org/" target="_blank">Librosa Audio Library</a></li>
+              </ul>
+            </div>
+          </div>
         </section>
       </section>
     </div>
@@ -190,7 +278,7 @@
   <footer class="border-t border-gray-200 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-sm text-gray-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <p>© <span id="year"></span> Leiden University · LIACS</p>
-      <p></p>
+      <p>Audio Processing & Indexing Project</p>
     </div>
   </footer>
 
