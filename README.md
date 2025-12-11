@@ -24,67 +24,32 @@ A multi-modal pipeline for detecting AI-assisted responses in audio recordings. 
 ```
 
 ├── app.py # Gradio web interface for the detection system
-
 ├── pipeline.py # Main orchestration pipeline combining all modules
-
 ├── audio_classifier.py # CNN-based audio classification (read vs spontaneous)
-
 ├── speech_recognizer.py # Whisper-based speech-to-text and linguistic analysis
-
 ├── text_analyzer.py # AI text detection wrapper
-
 ├── plagiarism_detection.py # Desklib AI text detector implementation
-
 │
-
 ├── model_checkpoints/ # Pre-trained CNN model weights
-
 │ ├── spectrogram_cnn_3s_window.pth
-
 │ ├── spectrogram_cnn_4s_window.pth
-
-│ └── spectrogram_cnn_4s_window_488_x_488.pth
-
 │
-
 ├── audio_classification_training/ # Training scripts for the CNN model
-
 │ ├── model.py # ResNet-based training script
-
 │ └── spectrogram.py # Audio-to-spectrogram conversion utility
-
 │
-
 ├── ai_plagiarism_testing/ # AI text detection experiments and results
-
 │ ├── ai_plagiarism_experiment/ # Experiment results (CSV files)
-
 │ ├── ai_plagiarism_tuning_plots/ # Threshold tuning plots
-
-│ ├── json_folder/ # Test datasets (GPT & human text samples)
-
-│ ├── text_folder/ # Test text files
-
-│ └── ai_plagiarism_important_notes.txt
-
 │
-
 ├── examples/ # Sample audio files for demo
-
 │ ├── read1.ogg # Example of read speech
-
 │ └── spontaneous1.ogg # Example of spontaneous speech
-
 │
-
 ├── index.html # Project documentation webpage
-
 ├── requirements.txt # Python dependencies
-
 │
-
 ├── iemocap.zip # Audio dataset (sample from IEMOCAP)
-
 └── samples_read_vs_spon.zip # Read vs Spontaneous speech samples
 
 ```
@@ -244,13 +209,13 @@ The trained model will be saved as a `.pth` file in the current directory.
 ## System Components
 
 
-- **Audio Classifier** — CNN model analyzing mel spectrograms + acoustic features (tempo, pitch, energy, ZCR) to classify speech as "read" or "spontaneous"
+- **Audio Classifier**. CNN model analyzing mel spectrograms + acoustic features (tempo, pitch, energy, ZCR) to classify speech as "read" or "spontaneous"
 
-- **Speech Recognizer** — OpenAI Whisper for transcription, plus Kopparapu-style linguistic features (filler words, pause patterns, speech rate)
+- **Speech Recognizer**. OpenAI Whisper for transcription, plus linguistic features (filler words, pause patterns, speech rate)
 
-- **Text Analyzer** — Desklib AI detector to identify AI-generated text content
+- **Text Analyzer**. Desklib AI detector to identify AI-generated text content
 
-- **Pipeline** — Combines all components with weighted scoring to produce a final authenticity verdict
+- **Pipeline**. Combines all components with weighted scoring to produce a final authenticity verdict
 
 
 ---
