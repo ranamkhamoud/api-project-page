@@ -141,9 +141,6 @@ This starts a local server at `http://localhost:7860`. You can:
 - View comprehensive analysis results across multiple tabs
 
 
-### Individual Components
-
-
 Each module can be run independently:
 
 
@@ -201,40 +198,6 @@ python audio_classification_training/model.py
 
 
 The trained model will be saved as a `.pth` file in the current directory.
-
-
----
-
-
-## System Components
-
-
-- **Audio Classifier**. CNN model analyzing mel spectrograms + acoustic features (tempo, pitch, energy, ZCR) to classify speech as "read" or "spontaneous"
-
-- **Speech Recognizer**. OpenAI Whisper for transcription, plus linguistic features (filler words, pause patterns, speech rate)
-
-- **Text Analyzer**. Desklib AI detector to identify AI-generated text content
-
-- **Pipeline**. Combines all components with weighted scoring to produce a final authenticity verdict
-
-
----
-
-
-## Output Verdicts
-
-
-The system produces one of four verdicts:
-
-
-- **AUTHENTIC** (score ≥ 0.70) — Low risk
-
-- **LIKELY AUTHENTIC** (score 0.50 – 0.69) — Moderate risk
-
-- **QUESTIONABLE** (score 0.30 – 0.49) — High risk
-
-- **LIKELY INAUTHENTIC** (score < 0.30) — Critical risk
-
 
 ---
 
